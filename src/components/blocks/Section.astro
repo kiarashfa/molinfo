@@ -1,0 +1,24 @@
+---
+// Edition collapsible section card. Server-rendered EXPANDED (all content in
+// the HTML for SEO); the header button collapses it with a smooth
+// grid-template-rows animation (delegated listener lives in Layout.astro).
+interface Props {
+  num: string;
+  id: string;
+  title: string;
+}
+const { num, id, title } = Astro.props;
+---
+
+<section class="ed-section" id={id} data-spy>
+  <h2 class="ed-head">
+    <button class="ed-toggle" type="button" aria-expanded="true" aria-controls={`${id}-body`}>
+      <span class="ed-num" aria-hidden="true">{num}</span>
+      <span class="ed-title">{title}</span>
+      <span class="ed-caret" aria-hidden="true">▾</span>
+    </button>
+  </h2>
+  <div class="ed-body" id={`${id}-body`}>
+    <div class="ed-inner"><slot /></div>
+  </div>
+</section>

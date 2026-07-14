@@ -1,0 +1,13 @@
+---
+// A non-empirical identity/classification fact (label + free-form value).
+// Value comes through the slot so pages can pass chips, links, code, etc.
+interface Props {
+  label: string;
+}
+const { label } = Astro.props;
+---
+
+<div class="fact">
+  <dt class="fact-label">{label}</dt>
+  <dd class="fact-value"><slot /></dd>
+</div>

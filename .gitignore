@@ -20,6 +20,7 @@ dist/
 npm-debug.log*
 
 # --- Editor / OS cruft ---
+.claude/
 .DS_Store
 Thumbs.db
 .vscode/

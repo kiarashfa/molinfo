@@ -1,0 +1,158 @@
+---
+// Homepage = the catalogue: the detailed sortable LIST presentation of the
+// whole archive (§8 home presentation #1; the timeline at /timeline/ is #2).
+// Server-rendered chronologically so the full list exists without JS; the
+// controls only reorder/hide rows.
+import Base from '../layouts/Base.astro';
+import { browseRowsByEra, eras, eraShortName, eraIndex, href } from '../lib/content';
+
+const byEra = await browseRowsByEra();
+const rows = byEra.flatMap((g) => g.rows);
+const total = rows.length;
+const haystack = (r: (typeof rows)[number]) =>
+  [r.title, r.subtitle ?? '', r.tagline ?? '', ...r.abbreviation, ...r.families]
+    .join(' ')
+    .toLowerCase();
+const description =
+  'A free, history-narrated encyclopedia of the polymers that made the modern world — ' +
+  `${total} entries across seven eras, from natural macromolecules to designed smart materials.`;
+---
+
+<Base title="Atlas of Polymers" description={description} current="catalogue">
+  <main>
+    <header class="cat-head">
+      <h1 class="cat-title">Atlas of Polymers</h1>
+      <p class="cat-sub">
+        A history-narrated encyclopedia of the polymers that made the modern world — {total}
+        entries across seven eras, 1833–2015. Browse, filter, and sort the whole archive.
+      </p>
+    </header>
+
+    <div class="cat-controls">
+      <input id="cat-search" type="search" placeholder="Search the archive…" autocomplete="off" />
+      <select id="cat-type" aria-label="Type">
+        <option value="all">All entries</option>
+        <option value="polymer">Polymers</option>
+        <option value="concept">Concepts</option>
+      </select>
+      <select id="cat-era" aria-label="Era">
+        <option value="all">Any era</option>
+        {eras.map((era, i) => <option value={String(i)}>{eraShortName(era.name)}</option>)}
+      </select>
+      <select id="cat-sort" aria-label="Sort">
+        <option value="year">Year, oldest first</option>
+        <option value="year-desc">Year, newest first</option>
+        <option value="title">Title A–Z</option>
+        <option value="family">Chemical family</option>
+        <option value="era">Era order</option>
+      </select>
+      <span class="cat-count" id="cat-count">{total} of {total} entries</span>
+    </div>
+
+    <div class="cat-rows" data-catalogue>
+      {
+        rows.map((row) => {
+          const eraI = eraIndex(row.era);
+          const shared = {
+            class: `cat-row era-c-${eraI}${row.concept ? ' cat-row--concept' : ''}`,
+            'data-title': row.title.toLowerCase(),
+            'data-year': String(row.year),
+            'data-era': String(eraI),
+            'data-type': row.concept ? 'concept' : 'polymer',
+            'data-family': (row.families[0] ?? '~').toLowerCase(),
+            'data-haystack': haystack(row),
+          };
+          const inner = (
+            <>
+              <span class="cat-row-year">
+                <b>{row.year}</b>
+                <span class="type-badge">{row.concept ? 'concept' : 'polymer'}</span>
+              </span>
+              <span class="cat-row-main">
+                <span
+                  class="cat-row-title"
+                  transition:name={row.concept ? undefined : `ed-${row.id}`}
+                >
+                  {row.title}
+                </span>
+                {row.subtitle && <span class="cat-row-sub">{row.subtitle}</span>}
+              </span>
+              <span class="cat-row-meta">
+                <span class="cat-row-era">{eraShortName(row.era)}</span>
+                <span>
+                  {row.families.map((f) => (
+                    <span class="chip chip--family">{f}</span>
+                  ))}
+                </span>
+              </span>
+            </>
+          );
+          return row.concept ? (
+            <div {...shared}>{inner}</div>
+          ) : (
+            <a {...shared} href={href(`/${row.id}/`)}>
+              {inner}
+            </a>
+          );
+        })
+      }
+    </div>
+  </main>
+</Base>
+
+<script>
+  function initCatalogue() {
+    const wrap = document.querySelector<HTMLElement>('[data-catalogue]');
+    if (!wrap) return;
+    const rows = Array.from(wrap.querySelectorAll<HTMLElement>('.cat-row'));
+    const search = document.getElementById('cat-search') as HTMLInputElement | null;
+    const eraSel = document.getElementById('cat-era') as HTMLSelectElement | null;
+    const typeSel = document.getElementById('cat-type') as HTMLSelectElement | null;
+    const sortSel = document.getElementById('cat-sort') as HTMLSelectElement | null;
+    const count = document.getElementById('cat-count');
+    if (!search || !eraSel || !typeSel || !sortSel || !count) return;
+    const collator = new Intl.Collator('en');
+
+    function apply() {
+      const q = search!.value.trim().toLowerCase();
+      const era = eraSel!.value;
+      const type = typeSel!.value;
+      const sort = sortSel!.value;
+      let visible = 0;
+      for (const r of rows) {
+        const show =
+          (!q || (r.dataset.haystack ?? '').includes(q)) &&
+          (era === 'all' || r.dataset.era === era) &&
+          (type === 'all' || r.dataset.type === type);
+        r.classList.toggle('is-hidden', !show);
+        if (show) visible++;
+      }
+      const byTitle = (a: HTMLElement, b: HTMLElement) =>
+        collator.compare(a.dataset.title ?? '', b.dataset.title ?? '');
+      const byYear = (a: HTMLElement, b: HTMLElement) =>
+        Number(a.dataset.year) - Number(b.dataset.year);
+      const sorted = rows.slice().sort((a, b) => {
+        switch (sort) {
+          case 'title':
+            return byTitle(a, b);
+          case 'year-desc':
+            return byYear(b, a) || byTitle(a, b);
+          case 'family':
+            return (
+              collator.compare(a.dataset.family ?? '', b.dataset.family ?? '') || byTitle(a, b)
+            );
+          case 'era':
+            return Number(a.dataset.era) - Number(b.dataset.era) || byYear(a, b) || byTitle(a, b);
+          default:
+            return byYear(a, b) || byTitle(a, b);
+        }
+      });
+      for (const r of sorted) wrap!.appendChild(r);
+      count!.textContent = `${visible} of ${rows.length} entries`;
+    }
+
+    for (const el of [search, eraSel, typeSel, sortSel]) el.addEventListener('input', apply);
+    apply();
+  }
+  document.addEventListener('astro:page-load', initCatalogue);
+</script>

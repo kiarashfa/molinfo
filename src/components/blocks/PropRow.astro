@@ -1,0 +1,38 @@
+---
+// Edition property row: same honest §3.3 semantics as the shared PropRow, but
+// citations render as numeric superscripts ([1], [2]…) anchoring into the
+// page's numbered References list (owner decision, 2026-07-14).
+import type { PropDisplay } from '../../lib/content';
+
+interface Props {
+  prop: PropDisplay;
+  /** citation key -> per-page number (from citationsFor) */
+  citeNumbers: Map<string, number>;
+}
+const { prop, citeNumbers } = Astro.props;
+const citeN = prop.source ? citeNumbers.get(prop.source) : undefined;
+const citeTitle = prop.source
+  ? `Source: ${prop.source}${prop.evidenceLevel ? ` · ${prop.evidenceLevel}` : ''}`
+  : undefined;
+---
+
+<div class={`prop prop--${prop.status}`}>
+  <dt class="prop-label">{prop.label}</dt>
+  <dd class="prop-data">
+    {
+      prop.value !== null ? (
+        <span class="prop-value">{prop.value}</span>
+      ) : (
+        <span class={`prop-empty prop-empty--${prop.status}`}>{prop.statusText}</span>
+      )
+    }
+    {prop.estimated && <span class="prop-flag">estimate</span>}
+    {citeN !== undefined && (
+      <a class="cite" href={`#ref-${citeN}`} title={citeTitle} aria-label={`Reference ${citeN}`}>
+        <sup>[{citeN}]</sup>
+      </a>
+    )}
+    {prop.testStandard && <span class="prop-standard">{prop.testStandard}</span>}
+    {prop.conditions && <span class="prop-conditions">{prop.conditions}</span>}
+  </dd>
+</div>

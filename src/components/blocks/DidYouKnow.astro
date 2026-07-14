@@ -1,0 +1,10 @@
+---
+// The narrative "did you know" close (split pass renders the source doc's
+// Quote-style callouts as <DidYouKnow>). Children-only — no props.
+// Appearance is entirely per-direction CSS on `.dyk*` classes.
+---
+
+<aside class="dyk">
+  <span class="dyk-label" aria-hidden="true">Did you know?</span>
+  <div class="dyk-body"><slot /></div>
+</aside>

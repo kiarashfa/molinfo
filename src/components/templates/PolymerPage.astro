@@ -1,0 +1,141 @@
+---
+// Full page template for one polymer entry (§7 "Edition"): era-progress
+// strip → title-page hero → section rail with scrollspy → the author's
+// narrative set like a fine book → all 13 §3.3 blocks as collapsible
+// numbered cards with numeric citations → chronological prev/next.
+import { render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import PolymerDataBlocks from '../blocks/PolymerDataBlocks.astro';
+import DidYouKnow from '../blocks/DidYouKnow.astro';
+import {
+  chronoNeighbours,
+  splitTitle,
+  eraShortName,
+  eraIndex,
+  eras,
+  href,
+  SECTIONS,
+  type PolymerEntry,
+} from '../../lib/content';
+
+interface Props {
+  entry: PolymerEntry;
+}
+const { entry } = Astro.props;
+const { narrative, data } = entry;
+const { Content } = await render(narrative);
+const { title, subtitle } = splitTitle(narrative.data.name);
+const currentEra = eraIndex(data.era);
+const { prev, next } = await chronoNeighbours(narrative.data.id);
+const showTagline =
+  narrative.data.tagline && narrative.data.tagline !== subtitle ? narrative.data.tagline : null;
+const description =
+  narrative.data.tagline ??
+  subtitle ??
+  `${title} — first synthesised ${data.year_of_origin}. History, properties, and applications.`;
+---
+
+<Base title={title} description={description}>
+  <article class={`era-c-${currentEra}`}>
+    <nav class="era-strip" aria-label="Eras">
+      {
+        eras.map((era, i) => (
+          <a
+            class:list={[`era-c-${i}`, { 'is-current': i === currentEra }]}
+            href={href(`/timeline/#era-${i}`)}
+            title={era.name}
+          >
+            <span class="era-strip-label">{eraShortName(era.name)}</span>
+          </a>
+        ))
+      }
+    </nav>
+
+    <header class="hero">
+      <p class="hero-eyebrow">{data.era}</p>
+      <div class="hero-year">{data.year_of_origin}</div>
+      <h1 class="hero-title" transition:name={`ed-${narrative.data.id}`}>{title}</h1>
+      {subtitle && <p class="hero-subtitle">{subtitle}</p>}
+      <p class="hero-meta">
+        {showTagline && (
+          <>
+            <em>“{showTagline}”</em>
+            <span class="sep">·</span>
+          </>
+        )}
+        {data.polymer_class && <span>{data.polymer_class}</span>}
+        {data.polymer_class && data.chemical_family.length > 0 && <span class="sep">·</span>}
+        {data.chemical_family.length > 0 && <span>{data.chemical_family.join(' · ')}</span>}
+        {narrative.data.key_figures.length > 0 && (
+          <>
+            <span class="sep">·</span>
+            <span>{narrative.data.key_figures.join(', ')}</span>
+          </>
+        )}
+      </p>
+      <div class="hero-ornament" aria-hidden="true"></div>
+    </header>
+
+    <div class="detail-grid">
+      <nav class="rail" aria-label="Sections">
+        <ul class="rail-list">
+          <li>
+            <a href="#narrative"><span class="rail-num">00</span> The Story</a>
+          </li>
+          {
+            SECTIONS.map((s) => (
+              <li>
+                <a href={`#${s.id}`}>
+                  <span class="rail-num">{s.num}</span> {s.title}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+
+      <div class="detail-main">
+        <div class="narrative" id="narrative" data-spy>
+          <Content components={{ DidYouKnow }} />
+        </div>
+
+        <PolymerDataBlocks data={data} />
+
+        <nav class="chrono-nav" aria-label="Chronological neighbours">
+          {
+            prev ? (
+              <a
+                class={`chrono-link era-c-${eraIndex(prev.data.era)}`}
+                href={href(`/${prev.narrative.data.id}/`)}
+              >
+                <span class="chrono-dir">← Earlier</span>
+                <div>
+                  <span class="chrono-year">{prev.data.year_of_origin}</span>
+                  {splitTitle(prev.narrative.data.name).title}
+                </div>
+              </a>
+            ) : (
+              <span />
+            )
+          }
+          {
+            next ? (
+              <a
+                class={`chrono-link chrono-link--next era-c-${eraIndex(next.data.era)}`}
+                href={href(`/${next.narrative.data.id}/`)}
+              >
+                <span class="chrono-dir">Later →</span>
+                <div>
+                  {splitTitle(next.narrative.data.name).title}
+                  <span class="chrono-year">{next.data.year_of_origin}</span>
+                </div>
+              </a>
+            ) : (
+              <span />
+            )
+          }
+        </nav>
+      </div>
+    </div>
+  </article>
+</Base>

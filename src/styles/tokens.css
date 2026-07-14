@@ -1,0 +1,96 @@
+/* ============================================================ tokens.css ===
+   The single source of truth for every design value (§7: every color,
+   spacing, radius, shadow, and motion value traces back to here).
+   Themes: light/dark via light-dark() + color-scheme forced by
+   html[data-theme]. Presentation styles (Gilt default / Vellum / Atelier)
+   are token overlays on html.variant-* — user preference, like light/dark.
+   =========================================================================== */
+
+:root {
+  color-scheme: light dark;
+
+  /* Gilt (default): the fine-press private edition */
+  --font-serif: 'Palatino Linotype', Palatino, 'Book Antiqua', 'Iowan Old Style', Georgia,
+    serif;
+  --font-label: var(--font-serif);
+
+  --paper: light-dark(#f7f1e3, #191511);
+  --paper-raised: light-dark(#fdf9ef, #211c15);
+  --paper-deep: light-dark(#efe7d3, #14100b);
+  --ink: light-dark(#241f18, #eae2d0);
+  --ink-soft: light-dark(#564e40, #c0b5a0);
+  --ink-muted: light-dark(#847a67, #938872);
+  --rule: light-dark(#ddd2ba, #3b342a);
+  --rule-strong: light-dark(#b4a887, #5c5340);
+  --foil: light-dark(#96793a, #c9a85c);
+  --wash: light-dark(rgba(150, 121, 58, 0.07), rgba(201, 168, 92, 0.08));
+  --shadow: light-dark(rgba(84, 66, 28, 0.1), rgba(0, 0, 0, 0.45));
+
+  /* Era scale — jewel/foil tones, sepia past → electric present. Index
+     matches src/data/taxonomy/eras.json. */
+  --era-0: light-dark(#8a6a3c, #cfa96b);
+  --era-1: light-dark(#a34a28, #dd9068);
+  --era-2: light-dark(#8c3038, #d47f86);
+  --era-3: light-dark(#a87b1f, #ddb356);
+  --era-4: light-dark(#3f7a52, #8cc49b);
+  --era-5: light-dark(#33708a, #85bed4);
+  --era-6: light-dark(#4d5bc9, #9ba8f0);
+  --era-color: var(--foil); /* pages without one era (catalogue, timeline head) */
+
+  --radius: 14px;
+  --radius-small: 8px;
+  --space-1: 0.4rem;
+  --space-2: 0.8rem;
+  --space-3: 1.3rem;
+  --space-4: 2.3rem;
+  --space-5: 4rem;
+  --measure: 68ch;
+  --page-pad: clamp(1rem, 4vw, 3rem);
+  --ornament: '❦';
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+}
+:root[data-theme='light'] {
+  color-scheme: light;
+}
+:root[data-theme='dark'] {
+  color-scheme: dark;
+}
+
+/* Era scoping: any element inside .era-c-N sees that era's color. */
+.era-c-0 { --era-color: var(--era-0); }
+.era-c-1 { --era-color: var(--era-1); }
+.era-c-2 { --era-color: var(--era-2); }
+.era-c-3 { --era-color: var(--era-3); }
+.era-c-4 { --era-color: var(--era-4); }
+.era-c-5 { --era-color: var(--era-5); }
+.era-c-6 { --era-color: var(--era-6); }
+
+/* --- Variant overlays: deliberate, minor deltas --------------------------- */
+.variant-vellum {
+  /* Own font family: Garamond — old-style, manuscript-warm; runs small, so
+     the body size compensates (see edition.css). */
+  --font-serif: Garamond, 'Goudy Old Style', Perpetua, 'Palatino Linotype', Georgia, serif;
+  --paper: light-dark(#f5ecda, #1b1610);
+  --paper-raised: light-dark(#fbf5e7, #231d14);
+  --paper-deep: light-dark(#ece1c8, #150f0a);
+  --foil: light-dark(#8a6a3c, #cfa96b); /* bronze, not gold — era color leads */
+  --ornament: '·';
+}
+.variant-atelier {
+  /* Own font family: Constantia — crisp transitional serif, gallery-modern. */
+  --font-serif: Constantia, Cambria, 'Georgia Pro', Georgia, serif;
+  --font-label: 'Segoe UI', 'Helvetica Neue', system-ui, sans-serif;
+  --paper: light-dark(#f7f6f3, #171614);
+  --paper-raised: light-dark(#fefdfb, #201f1c);
+  --paper-deep: light-dark(#edece7, #121110);
+  --ink: light-dark(#1b1916, #ebe9e4);
+  --ink-soft: light-dark(#4c483f, #c3c0b6);
+  --ink-muted: light-dark(#7f7a6e, #8f8b80);
+  --rule: light-dark(#e0ded6, #34322d);
+  --rule-strong: light-dark(#b7b3a6, #57544b);
+  --foil: light-dark(#6d6653, #b3ab8f); /* graphite-bronze, understated */
+  --wash: light-dark(rgba(109, 102, 83, 0.06), rgba(179, 171, 143, 0.07));
+  --radius: 18px;
+  --radius-small: 10px;
+  --ornament: '—';
+}

@@ -1,0 +1,71 @@
+---
+// The timeline: the second home presentation of the archive (§8) — an
+// era-colored chronological spine. Multi-entry years render as one diamond
+// marker with several cards (§4.1); variants sit at their OWN year, never
+// nested under their hub's.
+import Base from '../layouts/Base.astro';
+import { browseRowsByEra, eraShortName, href, type BrowseRow } from '../lib/content';
+
+const byEra = await browseRowsByEra();
+const total = byEra.reduce((n, g) => n + g.rows.length, 0);
+
+const groupByYear = (rows: BrowseRow[]) => {
+  const groups = new Map<number, BrowseRow[]>();
+  for (const row of rows) {
+    const g = groups.get(row.year);
+    if (g) g.push(row);
+    else groups.set(row.year, [row]);
+  }
+  return [...groups.entries()];
+};
+---
+
+<Base
+  title="Timeline"
+  description={`Every entry of the Atlas of Polymers on one line of time — ${total} polymers and concepts across seven eras, 1833 to 2015.`}
+  current="timeline"
+>
+  <main>
+    <header class="tl-head">
+      <h1 class="tl-title">The Timeline</h1>
+      <p class="tl-sub">{total} entries along one line of time, 1833 → 2015</p>
+    </header>
+    <div class="timeline">
+      {
+        byEra.map(({ era, rows }, i) => (
+          <section class={`tl-era era-c-${i}`} id={`era-${i}`}>
+            <header class="tl-era-head">
+              <h2 class="tl-era-name">{eraShortName(era.name)}</h2>
+              <span class="tl-era-range">
+                {era.year_start}–{era.year_end}
+              </span>
+            </header>
+            {groupByYear(rows).map(([year, group]) => (
+              <div class="tl-year-group">
+                <span class="tl-year-label">{year}</span>
+                <div class="tl-cards">
+                  {group.map((row) =>
+                    row.concept ? (
+                      <div class="tl-card tl-card--concept">
+                        <span class="tl-card-name">{row.title}</span>
+                        {row.subtitle && <span class="tl-card-sub">{row.subtitle}</span>}
+                        <span class="chip">concept</span>
+                      </div>
+                    ) : (
+                      <a class="tl-card" href={href(`/${row.id}/`)}>
+                        <span class="tl-card-name" transition:name={`ed-${row.id}`}>
+                          {row.title}
+                        </span>
+                        {row.subtitle && <span class="tl-card-sub">{row.subtitle}</span>}
+                      </a>
+                    )
+                  )}
+                </div>
+              </div>
+            ))}
+          </section>
+        ))
+      }
+    </div>
+  </main>
+</Base>

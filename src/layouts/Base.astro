@@ -1,0 +1,130 @@
+---
+// Site-wide chrome for the Atlas of Polymers ("Edition" design, §7).
+// Owns: head metadata, theme + presentation-style pre-paint stamps, header
+// (nav + VariantToggle + ThemeToggle), footer, View Transitions, and the
+// three global behaviors (section collapse, citation-click, rail scrollspy).
+import { ClientRouter } from 'astro:transitions';
+import ThemeToggle from '../components/ui/ThemeToggle.astro';
+import VariantToggle from '../components/ui/VariantToggle.astro';
+import { href } from '../lib/content';
+import '../styles/tokens.css';
+import '../styles/edition.css';
+
+interface Props {
+  title: string;
+  description: string;
+  /** Marks the matching header nav link with aria-current. */
+  current?: 'catalogue' | 'timeline';
+}
+const { title, description, current } = Astro.props;
+const isHome = title === 'Atlas of Polymers';
+---
+
+<!doctype html>
+<html lang="en" class="variant-gilt">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{isHome ? title : `${title} — Atlas of Polymers`}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={Astro.url} />
+    <meta property="og:site_name" content="Atlas of Polymers" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content={isHome ? 'website' : 'article'} />
+    <script is:inline>
+      (() => {
+        try {
+          const t = localStorage.getItem('pa-theme');
+          if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
+          const v = localStorage.getItem('pa-variant');
+          if (v === 'vellum' || v === 'atelier') {
+            document.documentElement.classList.remove('variant-gilt');
+            document.documentElement.classList.add('variant-' + v);
+          }
+        } catch {}
+      })();
+    </script>
+    <ClientRouter />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-head">
+      <a class="site-title" href={href('/')}>Atlas of Polymers</a>
+      <nav class="site-nav" aria-label="Site">
+        <a href={href('/')} aria-current={current === 'catalogue' ? 'page' : undefined}>
+          Catalogue
+        </a>
+        <span class="nav-sep" aria-hidden="true">·</span>
+        <a href={href('/timeline/')} aria-current={current === 'timeline' ? 'page' : undefined}>
+          Timeline
+        </a>
+      </nav>
+      <VariantToggle />
+      <ThemeToggle />
+    </header>
+    <div id="main">
+      <slot />
+    </div>
+    <footer class="site-foot">
+      <span class="foot-ornament" aria-hidden="true"></span>
+      <p>
+        Atlas of Polymers — a history-narrated encyclopedia of the polymers that made the modern
+        world. Text and data CC BY-SA 4.0 · free, no ads, no tracking.
+      </p>
+    </footer>
+  </body>
+</html>
+
+<script>
+  // Collapsible sections — delegated so it survives View Transitions swaps.
+  // Server HTML is always fully expanded (SEO); JS only ever collapses.
+  document.addEventListener('click', (e) => {
+    const btn = (e.target as Element | null)?.closest('.ed-toggle');
+    if (!btn) return;
+    const section = btn.closest('.ed-section');
+    if (!section) return;
+    const collapsed = section.classList.toggle('is-collapsed');
+    btn.setAttribute('aria-expanded', String(!collapsed));
+  });
+
+  // Numeric citation marks: make sure the References section is expanded
+  // before the browser smooth-scrolls to the anchored entry.
+  document.addEventListener('click', (e) => {
+    const cite = (e.target as Element | null)?.closest('a.cite');
+    if (!cite) return;
+    const refs = document.querySelector('#references');
+    if (refs) {
+      refs.classList.remove('is-collapsed');
+      refs.querySelector('.ed-toggle')?.setAttribute('aria-expanded', 'true');
+    }
+  });
+
+  // Section-rail scrollspy (highlight the section currently in view).
+  let spy: IntersectionObserver | null = null;
+  function initRailSpy() {
+    spy?.disconnect();
+    const rail = document.querySelector('.rail');
+    if (!rail) return;
+    const links = new Map<string, Element>();
+    rail.querySelectorAll('a[href*="#"]').forEach((a) => {
+      const id = (a.getAttribute('href') ?? '').split('#')[1];
+      if (id) links.set(id, a);
+    });
+    spy = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          const link = links.get(entry.target.id);
+          if (!link) continue;
+          if (entry.isIntersecting) {
+            rail.querySelectorAll('.is-active').forEach((el) => el.classList.remove('is-active'));
+            link.classList.add('is-active');
+          }
+        }
+      },
+      { rootMargin: '-20% 0px -70% 0px' }
+    );
+    document.querySelectorAll('[data-spy]').forEach((s) => spy!.observe(s));
+  }
+  document.addEventListener('astro:page-load', initRailSpy);
+</script>

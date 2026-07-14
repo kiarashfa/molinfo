@@ -1,0 +1,347 @@
+---
+// Edition renderer for all 13 locked §3.3 blocks: collapsible numbered
+// section cards (expanded by default), numeric superscript citations, and a
+// numbered References list with scroll anchors. Every block always renders,
+// with honest placeholder / N-A states — never omitted, never faked.
+import Section from './Section.astro';
+import PropRow from './PropRow.astro';
+import FactRow from './FactRow.astro';
+import {
+  describeProperty,
+  describeRated,
+  citationsFor,
+  SECTIONS,
+  type PolymerData,
+} from '../../lib/content';
+
+interface Props {
+  data: PolymerData;
+}
+const { data } = Astro.props;
+
+const sec = Object.fromEntries(SECTIONS.map((s) => [s.id, s]));
+const { numberFor, list: refList } = citationsFor(data.references);
+
+const physical = [
+  describeProperty('Density', data.physical.density),
+  describeProperty('Melt flow index', data.physical.melt_flow_index),
+  describeProperty('Refractive index', data.physical.refractive_index),
+  describeProperty('Dielectric constant', data.physical.dielectric_constant),
+  describeProperty('Electrical conductivity', data.physical.electrical_conductivity),
+];
+
+const thermal = [
+  describeProperty('Glass transition (Tg)', data.thermal.tg),
+  describeProperty('Melting temperature (Tm)', data.thermal.tm),
+  describeProperty('Crystallization (Tc)', data.thermal.tc),
+  describeProperty('Heat deflection (HDT)', data.thermal.hdt),
+  describeProperty('Decomposition onset', data.thermal.decomposition_onset),
+  describeProperty('Thermal conductivity', data.thermal.thermal_conductivity),
+];
+
+const mechanical = [
+  describeProperty('Tensile modulus', data.mechanical.tensile_modulus),
+  describeProperty('Yield strength', data.mechanical.yield_strength),
+  describeProperty('Tensile strength at break', data.mechanical.tensile_strength_at_break),
+  describeProperty('Elongation at break', data.mechanical.elongation_at_break),
+  describeProperty('Impact strength (Izod)', data.mechanical.impact_izod),
+  describeProperty('Impact strength (Charpy)', data.mechanical.impact_charpy),
+  describeProperty('Hardness', data.mechanical.hardness),
+  describeProperty('Flexural modulus', data.mechanical.flexural_modulus),
+];
+
+const resistance = [
+  ...Object.entries(data.chemical_resistance.solvent_resistance).map(([solvent, rv]) =>
+    describeRated(`Solvent — ${solvent}`, rv)
+  ),
+  describeRated('Weathering / UV', data.chemical_resistance.weathering_uv),
+  describeRated('Hydrolysis resistance', data.chemical_resistance.hydrolysis_resistance),
+  describeRated('Flammability (UL94)', data.chemical_resistance.flammability_ul94),
+];
+
+const morphProps = data.structure_morphology.crystallinity_typical
+  ? [describeProperty('Typical crystallinity', data.structure_morphology.crystallinity_typical)]
+  : [];
+
+const processingProps = [
+  describeProperty('Processing temperature', data.processing.processing_temp_range),
+  describeProperty('Shrinkage rate', data.processing.shrinkage_rate),
+];
+
+const bool = (v: boolean | null) => (v === null ? 'not yet determined' : v ? 'Yes' : 'No');
+const structureImagePending =
+  'Structure render pending — produced in the one-time ChemDraw batch pass (§5.2).';
+---
+
+<div class="data-blocks">
+  <p class="legend">
+    values with <a class="cite" href="#references"><sup>[n]</sup></a> cite the numbered
+    references<span class="sep">·</span><em>estimates are flagged</em><span class="sep">·</span
+    ><em>“not yet available” and “N/A” are honest states, not gaps</em>
+  </p>
+
+  <Section {...sec.identity}>
+    <dl class="fact-table">
+      <FactRow label="Abbreviation">
+        {
+          data.abbreviation.length ? (
+            data.abbreviation.map((a) => <span class="chip">{a}</span>)
+          ) : (
+            <span class="none">—</span>
+          )
+        }
+      </FactRow>
+      <FactRow label="Type">
+        <span class="chip">{data.type === 'hub' ? 'polymer family (hub)' : 'variant'}</span>
+        {data.parent && <span class="fact-note">part of the {data.parent} family</span>}
+      </FactRow>
+      <FactRow label="CAS number">
+        {data.cas_number ?? <span class="none">none — heterogeneous class or not assigned</span>}
+      </FactRow>
+      <FactRow label="Resin ID code">
+        {data.resin_id_code ?? <span class="none">none assigned</span>}
+      </FactRow>
+      <FactRow label="Repeat unit (BigSMILES)">
+        {
+          data.repeat_unit ? (
+            <code class="smiles">{data.repeat_unit}</code>
+          ) : (
+            <span class="none">{data.notation_note ?? 'no meaningful single repeat unit'}</span>
+          )
+        }
+      </FactRow>
+      <FactRow label="IUPAC name">{data.iupac_name ?? <span class="none">—</span>}</FactRow>
+      <FactRow label="Synonyms">
+        {data.synonyms.length ? data.synonyms.join('; ') : <span class="none">—</span>}
+      </FactRow>
+      <FactRow label="Also known as">
+        {
+          data.aliases.length ? (
+            data.aliases.map((a) => <span class="chip">{a.name}</span>)
+          ) : (
+            <span class="none">—</span>
+          )
+        }
+      </FactRow>
+    </dl>
+  </Section>
+
+  <Section {...sec.classification}>
+    <dl class="fact-table">
+      <FactRow label="Chemical family">
+        {
+          data.chemical_family.length ? (
+            data.chemical_family.map((f) => <span class="chip chip--family">{f}</span>)
+          ) : (
+            <span class="none">—</span>
+          )
+        }
+      </FactRow>
+      <FactRow label="Backbone class">{data.backbone_class ?? <span class="none">—</span>}</FactRow>
+      <FactRow label="Polymerization mechanism">
+        {
+          data.polymerization_mechanism.length ? (
+            data.polymerization_mechanism.map((mch) => <span class="chip">{mch}</span>)
+          ) : (
+            <span class="none">—</span>
+          )
+        }
+      </FactRow>
+      <FactRow label="Constitutional monomer">
+        {
+          data.monomer.length ? (
+            data.monomer.map((mono) => (
+              <a class="ext-link" href={mono.wikipedia_url} rel="noopener">
+                {mono.name}<span class="ext-mark" aria-hidden="true">↗</span>
+              </a>
+            ))
+          ) : (
+            <span class="none">— (no single constitutional monomer)</span>
+          )
+        }
+      </FactRow>
+      <FactRow label="Polymer class">{data.polymer_class ?? <span class="none">—</span>}</FactRow>
+    </dl>
+  </Section>
+
+  <Section {...sec.history}>
+    <dl class="fact-table">
+      <FactRow label="Year of origin">{data.year_of_origin}</FactRow>
+      <FactRow label="Era">{data.era}</FactRow>
+      <FactRow label="Key figures">
+        {data.key_figures.length ? data.key_figures.join(' · ') : <span class="none">—</span>}
+      </FactRow>
+      {
+        data.historical_events_referenced.length > 0 && (
+          <FactRow label="Events referenced">
+            {data.historical_events_referenced.join(' · ')}
+          </FactRow>
+        )
+      }
+    </dl>
+  </Section>
+
+  <Section {...sec.synthesis}>
+    <dl class="fact-table">
+      <FactRow label="Polymerization type">
+        {data.synthesis.polymerization_type ?? <span class="none">not yet available</span>}
+      </FactRow>
+      <FactRow label="Common monomers (feedstocks)">
+        {
+          data.synthesis.common_monomers.length ? (
+            data.synthesis.common_monomers.join(', ')
+          ) : (
+            <span class="none">not yet available</span>
+          )
+        }
+      </FactRow>
+      <FactRow label="Catalysts">
+        {
+          data.synthesis.catalysts.length ? (
+            data.synthesis.catalysts.join('; ')
+          ) : (
+            <span class="none">not yet available</span>
+          )
+        }
+      </FactRow>
+    </dl>
+    {
+      data.synthesis.industrial_process_notes && (
+        <p class="section-prose">{data.synthesis.industrial_process_notes}</p>
+      )
+    }
+  </Section>
+
+  <Section {...sec.structure}>
+    <dl class="fact-table">
+      <FactRow label="Tacticity">
+        {data.structure_morphology.tacticity ?? <span class="none">not yet available</span>}
+      </FactRow>
+      <FactRow label="Crystal structure">
+        {data.structure_morphology.crystal_structure ?? <span class="none">not yet available</span>}
+      </FactRow>
+    </dl>
+    {
+      morphProps.length > 0 && (
+        <dl class="prop-table">
+          {morphProps.map((p) => (
+            <PropRow prop={p} citeNumbers={numberFor} />
+          ))}
+        </dl>
+      )
+    }
+    {
+      data.structure_morphology.chain_flexibility_notes && (
+        <p class="section-prose">{data.structure_morphology.chain_flexibility_notes}</p>
+      )
+    }
+    {
+      data.structure_morphology.tg_relation_notes && (
+        <p class="section-prose">{data.structure_morphology.tg_relation_notes}</p>
+      )
+    }
+    <p class="pending-asset">{structureImagePending}</p>
+  </Section>
+
+  <Section {...sec.physical}>
+    <dl class="prop-table">
+      {physical.map((p) => <PropRow prop={p} citeNumbers={numberFor} />)}
+    </dl>
+  </Section>
+
+  <Section {...sec.thermal}>
+    <dl class="prop-table">
+      {thermal.map((p) => <PropRow prop={p} citeNumbers={numberFor} />)}
+    </dl>
+  </Section>
+
+  <Section {...sec.mechanical}>
+    <dl class="prop-table">
+      {mechanical.map((p) => <PropRow prop={p} citeNumbers={numberFor} />)}
+    </dl>
+  </Section>
+
+  <Section {...sec.resistance}>
+    <dl class="prop-table">
+      {resistance.map((p) => <PropRow prop={p} citeNumbers={numberFor} />)}
+    </dl>
+  </Section>
+
+  <Section {...sec.processing}>
+    <dl class="fact-table">
+      <FactRow label="Processing methods">
+        {
+          data.processing.processing_methods.length ? (
+            data.processing.processing_methods.map((pm) => <span class="chip">{pm}</span>)
+          ) : (
+            <span class="none">not yet available</span>
+          )
+        }
+      </FactRow>
+      <FactRow label="Drying required">{bool(data.processing.drying_required)}</FactRow>
+    </dl>
+    <dl class="prop-table">
+      {processingProps.map((p) => <PropRow prop={p} citeNumbers={numberFor} />)}
+    </dl>
+  </Section>
+
+  <Section {...sec.applications}>
+    {
+      data.applications.length ? (
+        <ul class="app-list">
+          {data.applications.map((app) => (
+            <li class="app-sector">
+              <span class="app-sector-name">{app.sector}</span>
+              <span class="app-examples">{app.examples.join(' · ')}</span>
+              {app.notes && <span class="app-notes">{app.notes}</span>}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p class="none">not yet available</p>
+      )
+    }
+  </Section>
+
+  <Section {...sec.environmental}>
+    <dl class="fact-table">
+      <FactRow label="Recyclable">{bool(data.environmental.recyclable)}</FactRow>
+      <FactRow label="Biodegradable">{bool(data.environmental.biodegradable)}</FactRow>
+      <FactRow label="Degradation pathway">
+        {data.environmental.degradation_pathway ?? <span class="none">not yet available</span>}
+      </FactRow>
+    </dl>
+    {
+      data.environmental.environmental_notes && (
+        <p class="section-prose">{data.environmental.environmental_notes}</p>
+      )
+    }
+  </Section>
+
+  <Section {...sec.references}>
+    {
+      refList.length ? (
+        <ol class="ref-list">
+          {refList.map((ref) => (
+            <li class="ref-item" id={`ref-${ref.n}`}>
+              <span class="ref-n">[{ref.n}]</span>
+              <span class="ref-body">
+                <span class="ref-title">{ref.bib.title}</span>
+                {ref.bib.publisher && <span class="ref-pub">{ref.bib.publisher}</span>}
+                {ref.bib.note && <span class="ref-note">{ref.bib.note}</span>}
+                {ref.bib.url && (
+                  <a class="ref-url" href={ref.bib.url} rel="noopener">
+                    {ref.bib.url}
+                  </a>
+                )}
+                <span class="ref-key">[{ref.key}]</span>
+              </span>
+            </li>
+          ))}
+        </ol>
+      ) : (
+        <p class="none">No sources consulted yet for this entry.</p>
+      )
+    }
+  </Section>
+</div>

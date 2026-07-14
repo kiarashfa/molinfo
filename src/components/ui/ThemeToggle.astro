@@ -1,0 +1,39 @@
+---
+// Light/dark toggle (§7: both themes from day one). Tokens are defined with
+// light-dark(); stamping data-theme on <html> forces color-scheme either way.
+// Click handling is delegated on document so it survives View Transitions swaps.
+---
+
+<button class="theme-toggle" type="button" data-theme-toggle>
+  <span class="tt-light">light</span><span class="tt-sep">/</span><span class="tt-dark">dark</span>
+</button>
+
+<script>
+  const resolveTheme = () => {
+    const forced = document.documentElement.dataset.theme;
+    if (forced === 'light' || forced === 'dark') return forced;
+    return matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  };
+
+  document.addEventListener('click', (e) => {
+    const btn = (e.target as Element | null)?.closest('[data-theme-toggle]');
+    if (!btn) return;
+    const next = resolveTheme() === 'dark' ? 'light' : 'dark';
+    document.documentElement.dataset.theme = next;
+    try {
+      localStorage.setItem('pa-theme', next);
+    } catch {
+      /* storage unavailable — toggle still works for this page */
+    }
+  });
+
+  // Re-stamp after View Transitions replace the <html> attributes.
+  document.addEventListener('astro:after-swap', () => {
+    try {
+      const t = localStorage.getItem('pa-theme');
+      if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
+    } catch {
+      /* ignore */
+    }
+  });
+</script>

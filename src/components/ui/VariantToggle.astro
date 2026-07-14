@@ -1,0 +1,55 @@
+---
+// Gilt / Vellum / Atelier switcher — a client-side presentation preference,
+// sibling of the light/dark toggle (owner decision, 2026-07-14). Stamps
+// `variant-*` on <html>, persists to localStorage['pa-variant']; the Layout's
+// inline head script applies the stored choice pre-paint on every load.
+import { VARIANTS } from '../../lib/variants';
+---
+
+<div class="variant-toggle" role="group" aria-label="Presentation style">
+  {
+    VARIANTS.map((v) => (
+      <button type="button" data-variant-btn={v.id} title={v.note}>
+        {v.name}
+      </button>
+    ))
+  }
+</div>
+
+<script>
+  const IDS = ['gilt', 'vellum', 'atelier'];
+
+  function applyVariant(v: string) {
+    const root = document.documentElement;
+    for (const id of IDS) root.classList.toggle(`variant-${id}`, id === v);
+    document.querySelectorAll<HTMLElement>('[data-variant-btn]').forEach((b) => {
+      b.classList.toggle('is-active', b.dataset.variantBtn === v);
+    });
+  }
+
+  function storedVariant(): string {
+    try {
+      const v = localStorage.getItem('pa-variant');
+      if (v && IDS.includes(v)) return v;
+    } catch {
+      /* ignore */
+    }
+    return 'gilt';
+  }
+
+  document.addEventListener('click', (e) => {
+    const btn = (e.target as Element | null)?.closest<HTMLElement>('[data-variant-btn]');
+    if (!btn?.dataset.variantBtn) return;
+    applyVariant(btn.dataset.variantBtn);
+    try {
+      localStorage.setItem('pa-variant', btn.dataset.variantBtn);
+    } catch {
+      /* storage unavailable — switch still applies to this page */
+    }
+  });
+
+  // Initial load + every View Transitions swap (the swap resets <html>'s
+  // class list to the server-rendered default).
+  document.addEventListener('astro:page-load', () => applyVariant(storedVariant()));
+  document.addEventListener('astro:after-swap', () => applyVariant(storedVariant()));
+</script>

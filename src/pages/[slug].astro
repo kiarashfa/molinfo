@@ -1,0 +1,21 @@
+---
+// Flat polymer routes (locked URL scheme): /polyethylene/, /nylon/, …
+// All rendering lives in the PolymerPage template.
+import PolymerPage from '../components/templates/PolymerPage.astro';
+import { loadPolymers, type PolymerEntry } from '../lib/content';
+
+export async function getStaticPaths() {
+  const entries = await loadPolymers();
+  return entries.map((entry) => ({
+    params: { slug: entry.narrative.data.id },
+    props: { entry },
+  }));
+}
+
+interface Props {
+  entry: PolymerEntry;
+}
+const { entry } = Astro.props;
+---
+
+<PolymerPage entry={entry} />
