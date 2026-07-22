@@ -1,4 +1,4 @@
-import { z } from 'astro:content';
+import { z } from 'astro/zod';
 import chemicalFamilies from '../data/taxonomy/chemical-families.json';
 import backboneClasses from '../data/taxonomy/backbone-classes.json';
 import polymerizationMechanisms from '../data/taxonomy/polymerization-mechanisms.json';
@@ -7,7 +7,7 @@ export const chemicalFamilyEnum = chemicalFamilies as [string, ...string[]];
 export const backboneClassEnum = backboneClasses as [string, ...string[]];
 export const polymerizationMechanismEnum = polymerizationMechanisms as [string, ...string[]];
 
-// Status semantics locked in instructions.md §3.3:
+// Status semantics for every empirical value on the site:
 // verified   -- source actually opened & read this session, URL/DOI in references.bib
 // estimated  -- inferred from family-typical ranges, not a direct measurement
 // placeholder -- not yet researched
@@ -26,7 +26,7 @@ const requireSourceUnlessUnresearched = (
   const needsSource = data.status === 'verified' || data.status === 'estimated';
   if (needsSource && !data.source) {
     ctx.addIssue({
-      code: z.ZodIssueCode.custom,
+      code: 'custom',
       message: `source is required when status is "${data.status}"`,
       path: ['source'],
     });
@@ -51,10 +51,8 @@ export type PropertyValue = z.infer<typeof propertyValueSchema>;
 
 // Same provenance/status discipline as propertyValueSchema, for empirical
 // properties that are categorical rather than numeric (UL94 flammability
-// rating, solvent-resistance ratings, etc.) -- not explicitly named in
-// instructions.md §3.3's PropertyValue code block (which is number-typed),
-// but the "never a bare value, always cited + statused" rule clearly extends
-// to these too.
+// rating, solvent-resistance ratings, etc.) -- the "never a bare value,
+// always cited + statused" rule extends to these too.
 export const ratedValueSchema = z
   .object({
     value: z.string().nullable(),
@@ -67,8 +65,8 @@ export const ratedValueSchema = z
   .superRefine(requireSourceUnlessUnresearched);
 export type RatedValue = z.infer<typeof ratedValueSchema>;
 
-// Shared structured image object (§3.3 Media block) -- every image field
-// site-wide uses this, never a bare path.
+// Shared structured image object -- every image field site-wide uses this,
+// never a bare path (license + attribution always recorded).
 export const imageObjectSchema = z.object({
   src: z.string(),
   alt: z.string(),
@@ -80,7 +78,7 @@ export const imageObjectSchema = z.object({
 });
 export type ImageObject = z.infer<typeof imageObjectSchema>;
 
-// §5.2: structure imagery additionally records ChemDraw provenance.
+// Structure imagery additionally records drawing-tool provenance.
 export const structureImageSchema = imageObjectSchema.extend({
   tool: z.literal('ChemDraw'),
   generated_date: z.string(), // ISO date

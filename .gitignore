@@ -1,4 +1,4 @@
-# --- Internal planning / authoring-only docs (never published; see CLAUDE.md, instructions.md §10) ---
+# --- Internal working files (not part of the published site) ---
 CLAUDE.md
 instructions.md
 handoff.md
@@ -8,6 +8,7 @@ progress.json
 document.docx
 content_manifest.json
 polymer_document_inventory.md
+historical-milestones.txt
 
 # Authoring-only tooling (ChemDraw automation, docx-splitting scripts, local tests)
 /scripts/

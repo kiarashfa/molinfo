@@ -1,20 +1,22 @@
 // Content-layer plumbing for the site: data loading/joining, property-value
-// display semantics (§3.3), numeric citation mapping, references.bib parsing,
+// display semantics, numeric citation mapping, references.bib parsing,
 // era/taxonomy helpers. One source of truth — templates and pages never
 // duplicate any of this logic.
 import { getCollection, type CollectionEntry } from 'astro:content';
 import erasData from '../data/taxonomy/eras.json';
 import bibRaw from '../../references.bib?raw';
 import { parseBib, type BibEntry } from './bib';
+import { IMPERIAL_RULES, siText } from './units';
 
 // ---------------------------------------------------------------- base URL --
-// GitHub Pages project deploy serves under /PolymerAtlas (§9.2) — every
+// GitHub Pages project deploy serves under /PolymerAtlas — every
 // internal link must respect BASE_URL.
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 export const href = (path: string) => `${base}/${path.replace(/^\//, '')}`;
 
-/** Canonical site path for an entry (§9.1 locked URL scheme: type-prefixed
- *  flat slugs — /polymers/<id>/, /concepts/<id>/; never hub/variant nesting). */
+/** Canonical site path for an entry (type-prefixed flat slugs —
+ *  /polymers/<id>/, /concepts/<id>/; never hub/variant nesting, so URLs
+ *  survive any future re-parenting unchanged). */
 export const entryPath = (kind: 'polymer' | 'concept', id: string) =>
   href(`/${kind === 'concept' ? 'concepts' : 'polymers'}/${id}/`);
 
@@ -109,7 +111,7 @@ export async function loadConcepts(): Promise<ConceptEntry[]> {
  *  and the type filter. */
 export interface BrowseRow {
   id: string;
-  /** Canonical site path (type-prefixed per §9.1). */
+  /** Canonical site path (type-prefixed flat slug). */
   path: string;
   title: string;
   subtitle: string | null;
@@ -127,7 +129,7 @@ export interface BrowseRow {
 let browseCache: { era: Era; rows: BrowseRow[] }[] | null = null;
 
 /** All 96 entries grouped by era, chronologically ordered within each era.
- *  Multi-entry years are expected and first-class (§4.1). */
+ *  Multi-entry years are expected and first-class. */
 export async function browseRowsByEra(): Promise<{ era: Era; rows: BrowseRow[] }[]> {
   if (browseCache) return browseCache;
   const [polymers, concepts] = await Promise.all([loadPolymers(), loadConcepts()]);
@@ -175,7 +177,7 @@ export interface ChronoRef {
 let chronoCache: (ChronoRef & { id: string })[] | null = null;
 
 /** Chronological prev/next across ALL entries — polymers and concepts share
- *  one chain, matching the timeline (every page sits at its own year, §8). */
+ *  one chain, matching the timeline (every page sits at its own year). */
 export async function chronoNeighbours(id: string) {
   if (!chronoCache) {
     const [polymers, concepts] = await Promise.all([loadPolymers(), loadConcepts()]);
@@ -210,8 +212,12 @@ export interface PropDisplay {
   label: string;
   /** Formatted value + unit, or null when there is nothing to show. */
   value: string | null;
+  /** Raw SI numbers behind `value`, present only when the unit is
+   *  imperial-convertible — PropRow stamps them as data attributes for the
+   *  client-side unit toggle. */
+  si?: { value: number | null; min: number | null; max: number | null; unit: string };
   status: Status;
-  /** Honest empty-state wording (§3.3: never omit the block or fake a value). */
+  /** Honest empty-state wording (never omit the block or fake a value). */
   statusText: string;
   estimated: boolean;
   conditions?: string;
@@ -241,21 +247,22 @@ interface NumericValue {
 
 export function describeProperty(label: string, pv: NumericValue): PropDisplay {
   let value: string | null = null;
+  let si: PropDisplay['si'];
   if (pv.status === 'verified' || pv.status === 'estimated') {
+    const v = pv.value ?? null;
     const hasRange = pv.range_min != null && pv.range_max != null;
-    const range = hasRange ? `${pv.range_min}–${pv.range_max}` : null;
-    let core: string | null = null;
-    if (pv.value != null && range) core = `${pv.value} (${range})`;
-    else if (pv.value != null) core = String(pv.value);
-    else if (range) core = range;
-    if (core !== null) {
-      const unit = pv.unit?.trim();
-      value = unit ? `${core} ${unit}` : core;
+    const min = hasRange ? pv.range_min! : null;
+    const max = hasRange ? pv.range_max! : null;
+    value = siText(v, min, max, pv.unit ?? '');
+    // Expose the raw SI numbers only when the unit toggle can act on them.
+    if (value !== null && IMPERIAL_RULES[(pv.unit ?? '').trim()]) {
+      si = { value: v, min, max, unit: pv.unit.trim() };
     }
   }
   return {
     label,
     value,
+    si,
     status: pv.status,
     statusText: EMPTY_TEXT[pv.status],
     estimated: pv.status === 'estimated',
@@ -292,8 +299,8 @@ export function describeRated(label: string, rv: RatedValue): PropDisplay {
 }
 
 // ------------------------------------------------------------- section map --
-// One canonical section list (§3.3 blocks) shared by the data-block renderer
-// and any per-direction section nav, so they can never drift apart.
+// One canonical section list shared by the data-block renderer and the
+// section rail, so they can never drift apart.
 export const SECTIONS = [
   { num: '01', id: 'identity', title: 'Identity' },
   { num: '02', id: 'classification', title: 'Classification' },
@@ -303,7 +310,7 @@ export const SECTIONS = [
   { num: '06', id: 'physical', title: 'Physical Properties' },
   { num: '07', id: 'thermal', title: 'Thermal Properties' },
   { num: '08', id: 'mechanical', title: 'Mechanical Properties' },
-  { num: '09', id: 'resistance', title: 'Chemical & Environmental Resistance' },
+  { num: '09', id: 'resistance', title: 'Resistance' },
   { num: '10', id: 'processing', title: 'Processing' },
   { num: '11', id: 'applications', title: 'Applications' },
   { num: '12', id: 'environmental', title: 'Environmental & Recycling' },
@@ -311,7 +318,7 @@ export const SECTIONS = [
 ] as const;
 
 // Concept pages have their own, lighter section list (schema in
-// concept-data-schema.ts — not the locked §3.3 blocks).
+// concept-data-schema.ts — not the 13 polymer blocks).
 export const CONCEPT_SECTIONS = [
   { num: '01', id: 'overview', title: 'Overview' },
   { num: '02', id: 'equations', title: 'Key Equations' },
@@ -322,9 +329,9 @@ export const CONCEPT_SECTIONS = [
 // ------------------------------------------------------------ references.bib --
 export type { BibEntry } from './bib';
 
-/** Per-page numeric citations (owner decision, 2026-07-14): in-page marks are
- *  superscript [1], [2] … that anchor into the numbered References list. The
- *  page's `references[]` array order defines the numbering. */
+/** Per-page numeric citations: in-page marks are superscript [1], [2] …
+ *  that anchor into the numbered References list. The page's
+ *  `references[]` array order defines the numbering. */
 export interface PageCitations {
   /** citation key -> 1-based number on this page */
   numberFor: Map<string, number>;

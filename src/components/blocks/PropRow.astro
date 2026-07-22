@@ -1,7 +1,7 @@
 ---
-// Edition property row: same honest §3.3 semantics as the shared PropRow, but
-// citations render as numeric superscripts ([1], [2]…) anchoring into the
-// page's numbered References list (owner decision, 2026-07-14).
+// Edition property row: honest empty-state semantics, with citations as
+// numeric superscripts ([1], [2]…) anchoring into the page's numbered
+// References list.
 import type { PropDisplay } from '../../lib/content';
 
 interface Props {
@@ -21,7 +21,15 @@ const citeTitle = prop.source
   <dd class="prop-data">
     {
       prop.value !== null ? (
-        <span class="prop-value">{prop.value}</span>
+        <span
+          class="prop-value"
+          data-si-unit={prop.si?.unit}
+          data-si-v={prop.si && prop.si.value !== null ? prop.si.value : undefined}
+          data-si-min={prop.si && prop.si.min !== null ? prop.si.min : undefined}
+          data-si-max={prop.si && prop.si.max !== null ? prop.si.max : undefined}
+        >
+          {prop.value}
+        </span>
       ) : (
         <span class={`prop-empty prop-empty--${prop.status}`}>{prop.statusText}</span>
       )

@@ -1,7 +1,7 @@
 # Atlas of Polymers
 
 A free, history-narrated encyclopedia of the polymers that made the modern
-world — 96 entries across seven eras (1833–2015), from nature's
+world — 96 entries across seven eras (1833 onward), from nature's
 macromolecules to designed smart materials. No ads, no logins, no tracking.
 
 Each polymer page pairs an author-written historical narrative with a fully
@@ -16,12 +16,16 @@ carry build-time-rendered equations with variable legends alongside their
 narratives.
 
 **Browse**: a sortable, filterable catalogue (home), an era-colored
-timeline (`/timeline/`), full-text search (Ctrl-K / `/`, filterable by type
-and era, alias-aware — searching "teflon" or "PE80" finds the right page),
-computed related-entry links on every polymer page, and automatic
-cross-links wherever one entry's narrative mentions another. Light/dark
-theme and three presentation styles (Gilt · Vellum · Atelier) are
-switchable in the header.
+timeline (`/timeline/`), an infinite-canvas chart of polymer history
+(`/constellation/`) — pan across two centuries, zoom from the sweep of eras
+down to a single material, follow each family's strand, filter by era or
+family,
+full-text search (Ctrl-K / `/`, filterable by type and era, alias-aware —
+searching "teflon" or "PE80" finds the right page), computed related-entry
+links on every polymer page, and automatic cross-links wherever one entry's
+narrative mentions another. Light/dark theme and three presentation styles
+(Gilt · Vellum · Atelier) are switchable from the reading-preferences menu
+in the header.
 
 ## Development
 

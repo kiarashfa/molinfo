@@ -92,7 +92,7 @@
     "recyclable": null,
     "biodegradable": null,
     "degradation_pathway": null,
-    "environmental_notes": "Explicitly excluded from this atlas's core polymer-page schema per instructions.md §3.3/§11: no ML-predicted property values are shown on individual polymer pages themselves (that output belongs on a separate, dedicated tool page) -- this entry documents the methodology as a historical/technical topic, not as a source of predicted numbers for other entries."
+    "environmental_notes": "By deliberate editorial policy, no ML-predicted property values are shown on any polymer page of this atlas -- this entry documents the methodology as a historical/technical topic, not as a source of predicted numbers for other entries."
   },
 
   "references": ["search-ai-designed-polymers"],

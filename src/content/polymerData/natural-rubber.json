@@ -10,7 +10,7 @@
   "cas_number": "9006-04-6",
   "resin_id_code": null,
   "repeat_unit": null,
-  "notation_note": "cis-1,4-polyisoprene; a defined repeat unit exists but was not converted to BigSMILES notation this session (deferred, see §5 pipeline).",
+  "notation_note": "cis-1,4-polyisoprene; a defined repeat unit exists but has not yet been converted to BigSMILES notation.",
   "iupac_name": "cis-1,4-polyisoprene",
   "synonyms": [
     "India rubber",

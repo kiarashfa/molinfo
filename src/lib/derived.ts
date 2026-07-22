@@ -1,10 +1,10 @@
-// Build-time derived artifacts (instructions.md §9.3) — never hand-maintained,
-// never runtime-derived:
+// Build-time derived artifacts — never hand-maintained, never
+// runtime-derived:
 //   • catalogueIndex()  — the lightweight structured-fields JSON index that
-//     powers the advanced catalogue table and the constellation layout (§8).
+//     powers the catalogue table and the constellation layout.
 //     Served as /catalogue.json (src/pages/catalogue.json.ts).
 //   • timelineData()    — year→entries mapping with era metadata, multi-entry
-//     years first-class (§4.1). THE single data source for the timeline page
+//     years first-class. THE single data source for the timeline page
 //     and /timeline.json.
 //   • relatedFor(id)    — deterministic top-N related polymers per page,
 //     weighted overlap across structured fields; weights live in ONE config

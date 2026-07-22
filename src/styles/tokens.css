@@ -1,17 +1,33 @@
 /* ============================================================ tokens.css ===
-   The single source of truth for every design value (§7: every color,
+   The single source of truth for every design value (every color,
    spacing, radius, shadow, and motion value traces back to here).
    Themes: light/dark via light-dark() + color-scheme forced by
    html[data-theme]. Presentation styles (Gilt default / Vellum / Atelier)
    are token overlays on html.variant-* — user preference, like light/dark.
    =========================================================================== */
 
+/* Browser floor: theming relies on CSS light-dark(), supported by all
+   evergreen browsers since spring 2024 (Chrome/Edge 123+, Firefox 120+,
+   Safari 17.5+). Older browsers fall back to default colors with the
+   layout intact — an accepted trade-off for a single-definition token set. */
 :root {
   color-scheme: light dark;
 
+  /* The three presentation-style faces, each defined once so components
+     (e.g. the header menu's style options) can typeset a name in the face
+     it switches to, regardless of the active variant. System stacks by
+     design — the canonical faces are commercial (not self-hostable) and
+     free lookalikes would alter the design; instead each stack carries a
+     true equivalent per platform (Windows / macOS / Linux). */
+  --font-gilt: 'Palatino Linotype', Palatino, 'URW Palladio L', P052, 'Book Antiqua',
+    'Iowan Old Style', Georgia, serif;
+  --font-vellum: Garamond, 'EB Garamond', 'Hoefler Text', 'Goudy Old Style', Perpetua,
+    'Palatino Linotype', Palatino, Georgia, serif;
+  --font-atelier: Constantia, Charter, 'Bitstream Charter', Cambria, 'Georgia Pro',
+    Georgia, serif;
+
   /* Gilt (default): the fine-press private edition */
-  --font-serif: 'Palatino Linotype', Palatino, 'Book Antiqua', 'Iowan Old Style', Georgia,
-    serif;
+  --font-serif: var(--font-gilt);
   --font-label: var(--font-serif);
 
   --paper: light-dark(#f7f1e3, #191511);
@@ -44,7 +60,10 @@
   --space-3: 1.3rem;
   --space-4: 2.3rem;
   --space-5: 4rem;
-  --measure: 68ch;
+  /* One shared content-column width: narrative, data blocks, related strip
+     and chrono nav all cap here on wide screens (rem, not ch, so the column
+     is identical across the three variant font families). */
+  --measure: 44rem;
   --page-pad: clamp(1rem, 4vw, 3rem);
   --ornament: '❦';
   --ease: cubic-bezier(0.4, 0, 0.2, 1);
@@ -69,7 +88,7 @@
 .variant-vellum {
   /* Own font family: Garamond — old-style, manuscript-warm; runs small, so
      the body size compensates (see edition.css). */
-  --font-serif: Garamond, 'Goudy Old Style', Perpetua, 'Palatino Linotype', Georgia, serif;
+  --font-serif: var(--font-vellum);
   --paper: light-dark(#f5ecda, #1b1610);
   --paper-raised: light-dark(#fbf5e7, #231d14);
   --paper-deep: light-dark(#ece1c8, #150f0a);
@@ -78,7 +97,7 @@
 }
 .variant-atelier {
   /* Own font family: Constantia — crisp transitional serif, gallery-modern. */
-  --font-serif: Constantia, Cambria, 'Georgia Pro', Georgia, serif;
+  --font-serif: var(--font-atelier);
   --font-label: 'Segoe UI', 'Helvetica Neue', system-ui, sans-serif;
   --paper: light-dark(#f7f6f3, #171614);
   --paper-raised: light-dark(#fefdfb, #201f1c);

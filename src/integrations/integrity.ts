@@ -1,6 +1,5 @@
-// Build-time content integrity checks (instructions.md §10 consequence rule:
-// /tests and /scripts never reach CI, so anything that must gate the cloud
-// build lives HERE, in committed code, wired into `astro build` itself).
+// Build-time content integrity checks — anything that must gate the cloud
+// build lives HERE, in committed code, wired into `astro build` itself.
 //
 // Division of labour: the Zod content-collection schemas already validate
 // shape, taxonomy tags (semi-controlled enums from src/data/taxonomy/), and

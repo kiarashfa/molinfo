@@ -1,5 +1,5 @@
 /* =========================================================== edition.css ===
-   The "Edition" design skin (instructions.md §7, decided 2026-07-14).
+   The "Edition" design skin.
    Every value references tokens.css — no raw colors/sizes here beyond
    typographic scale. Loaded globally by src/layouts/Base.astro, after
    tokens.css.
@@ -89,7 +89,6 @@ code {
   z-index: 20;
 }
 .site-title {
-  margin-right: auto;
   text-decoration: none;
   font-size: 1.05rem;
   font-weight: 600;
@@ -101,6 +100,9 @@ code {
   display: flex;
   gap: 0.6em;
   align-items: baseline;
+  /* Nav sits on the right, just before the two icon buttons; the title
+     alone holds the left. */
+  margin-left: auto;
 }
 .site-nav a {
   color: var(--ink-soft);
@@ -118,55 +120,243 @@ code {
 .nav-sep {
   color: var(--rule-strong);
 }
-.theme-toggle {
-  background: none;
-  border: 1px solid var(--rule-strong);
-  border-radius: 999px;
-  color: var(--ink-muted);
-  font: inherit;
-  font-size: 0.78rem;
-  padding: 0.12rem 0.7rem;
-  cursor: pointer;
-  transition: color 0.25s var(--ease), border-color 0.25s var(--ease);
-}
-.theme-toggle:hover {
-  color: var(--foil);
-  border-color: var(--foil);
-}
-.variant-toggle {
+
+/* --- header tools: two quiet icon buttons on the right ------------------- */
+.head-tools {
   display: flex;
-  border: 1px solid var(--rule-strong);
-  border-radius: 999px;
-  overflow: hidden;
+  align-items: center;
+  gap: 0.3rem;
 }
-.variant-toggle button {
+.head-icon-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 2.3rem;
+  height: 2.3rem;
+  padding: 0;
   background: none;
   border: none;
-  font-family: var(--font-label);
-  font-variant-caps: all-small-caps;
-  letter-spacing: 0.1em;
-  font-size: 0.82rem;
-  color: var(--ink-muted);
-  padding: 0.12rem 0.7rem;
+  border-radius: 999px;
+  color: var(--ink-soft);
   cursor: pointer;
   transition: color 0.25s var(--ease), background 0.25s var(--ease);
 }
-.variant-toggle button + button {
-  border-left: 1px solid var(--rule);
+.head-icon-btn:hover {
+  color: var(--foil);
+  background: var(--wash);
 }
-.variant-toggle button:hover {
+
+/* --- the reader's menu: a colophon-style dropdown ------------------------ */
+.head-menu {
+  position: relative;
+}
+.head-menu.is-open .head-icon-btn {
+  color: var(--foil);
+  background: var(--wash);
+}
+.head-menu-panel {
+  position: absolute;
+  top: calc(100% + 0.7rem);
+  right: 0;
+  z-index: 40;
+  width: 17.5rem;
+  background: var(--paper-raised);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius);
+  box-shadow: 0 18px 50px var(--shadow);
+  padding: var(--space-2);
+  opacity: 0;
+  transform: translateY(-10px) scale(0.98);
+  transform-origin: top right;
+  pointer-events: none;
+  transition: opacity 0.3s var(--ease), transform 0.3s var(--ease);
+}
+.head-menu.is-open .head-menu-panel {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+.menu-group + .menu-group {
+  margin-top: var(--space-2);
+}
+/* group labels sit between hairlines, like the narrative's section heads */
+.menu-group-label {
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+  margin: 0 0 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--ink-muted);
+}
+.menu-group-label::before,
+.menu-group-label::after {
+  content: '';
+  flex: 1;
+  border-top: 1px solid var(--rule);
+}
+/* rows cascade in a beat apart when the panel unfolds */
+.menu-stagger {
+  opacity: 0;
+  transform: translateY(-7px);
+  transition: opacity 0.3s var(--ease), transform 0.3s var(--ease);
+}
+.head-menu.is-open .menu-stagger {
+  opacity: 1;
+  transform: none;
+}
+.head-menu.is-open .menu-group:nth-child(1) .menu-stagger:nth-child(1) {
+  transition-delay: 0.03s;
+}
+.head-menu.is-open .menu-group:nth-child(1) .menu-stagger:nth-child(2) {
+  transition-delay: 0.07s;
+}
+.head-menu.is-open .menu-group:nth-child(1) .menu-stagger:nth-child(3) {
+  transition-delay: 0.11s;
+}
+.head-menu.is-open .menu-group:nth-child(1) .menu-stagger:nth-child(4) {
+  transition-delay: 0.15s;
+}
+.head-menu.is-open .menu-group:nth-child(2) .menu-stagger:nth-child(1) {
+  transition-delay: 0.19s;
+}
+.head-menu.is-open .menu-group:nth-child(2) .menu-stagger:nth-child(2) {
+  transition-delay: 0.23s;
+}
+.head-menu.is-open .menu-group:nth-child(3) .menu-stagger:nth-child(1) {
+  transition-delay: 0.27s;
+}
+.head-menu.is-open .menu-group:nth-child(3) .menu-stagger:nth-child(2) {
+  transition-delay: 0.31s;
+}
+.menu-option {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  border-radius: var(--radius-small);
+  padding: 0.45rem 0.55rem;
+  color: var(--ink);
+  cursor: pointer;
+  transition: opacity 0.3s var(--ease), transform 0.3s var(--ease),
+    background 0.2s var(--ease);
+}
+.menu-option:hover {
+  background: var(--wash);
+}
+.menu-option-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.05rem;
+  min-width: 0;
+}
+/* each style's name is typeset in the face it switches to */
+.menu-option-name {
+  font-weight: 600;
+  font-size: 1.04rem;
+  line-height: 1.25;
+  transition: color 0.25s var(--ease);
+}
+.menu-option-name--gilt {
+  font-family: var(--font-gilt);
+}
+.menu-option-name--vellum {
+  font-family: var(--font-vellum);
+  font-size: 1.13rem; /* Garamond runs small */
+}
+.menu-option-name--atelier {
+  font-family: var(--font-atelier);
+}
+.menu-option-note {
+  font-size: 0.78rem;
+  font-style: italic;
+  color: var(--ink-muted);
+}
+.menu-option.is-active .menu-option-name {
   color: var(--foil);
 }
-.variant-toggle button.is-active {
-  background: var(--foil);
-  color: var(--paper-raised);
+.menu-option-mark {
+  margin-left: auto;
+  color: var(--foil);
+  font-size: 0.85rem;
+  opacity: 0;
+  transform: scale(0.4) rotate(-90deg);
+  transition: opacity 0.3s var(--ease), transform 0.3s var(--ease);
 }
-.variant-atelier .variant-toggle button {
+.menu-option.is-active .menu-option-mark {
+  opacity: 1;
+  transform: none;
+}
+/* two-option segmented pairs (theme Day/Night, units SI/Imperial) */
+.menu-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.45rem;
+}
+.menu-pair-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  font-family: var(--font-label);
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.1em;
+  font-size: 0.92rem;
+  color: var(--ink-soft);
+  background: none;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  padding: 0.4rem 0.6rem;
+  cursor: pointer;
+  transition: color 0.25s var(--ease), border-color 0.25s var(--ease),
+    background 0.25s var(--ease);
+}
+.menu-pair-btn:hover {
+  color: var(--foil);
+  border-color: var(--rule-strong);
+}
+.menu-pair-btn.is-active {
+  color: var(--foil);
+  border-color: var(--foil);
+  background: var(--wash);
+}
+.variant-atelier .menu-pair-btn {
   font-variant-caps: normal;
   text-transform: uppercase;
-  font-size: 0.62rem;
+  font-size: 0.68rem;
   letter-spacing: 0.14em;
   font-weight: 600;
+}
+/* the small unit glyph standing where Day/Night carry their icons */
+.menu-pair-glyph {
+  font-size: 0.82em;
+  color: var(--ink-muted);
+  font-variant-numeric: lining-nums;
+  transition: color 0.25s var(--ease);
+}
+.menu-pair-btn.is-active .menu-pair-glyph,
+.menu-pair-btn:hover .menu-pair-glyph {
+  color: inherit;
+}
+@media (max-width: 640px) {
+  .site-head {
+    flex-wrap: wrap;
+    row-gap: 0.1rem;
+  }
+  .site-title {
+    order: 1;
+  }
+  .head-tools {
+    order: 2;
+    margin-left: auto; /* nav lives on row 2 here; icons still push right */
+  }
+  .site-nav {
+    order: 3;
+    width: 100%;
+    margin-left: 0;
+  }
 }
 .site-foot {
   margin-top: var(--space-5);
@@ -398,7 +588,7 @@ code {
 .narrative p {
   margin: 0 0 1.1em;
 }
-/* §9.3 automatic cross-links — the only internal links in narrative prose.
+/* Automatic cross-links — the only internal links in narrative prose.
    Book-quiet: ink-colored text, era-colored underline that strengthens on
    hover; never a loud web-blue. */
 .narrative a.autolink {
@@ -523,7 +713,10 @@ code {
 
 /* ========================================================= section cards */
 .data-blocks {
-  margin-top: var(--space-4);
+  /* Same column as the narrative (--measure): the book text and the data
+     tables read as one page, not two different layouts. */
+  max-width: var(--measure);
+  margin: var(--space-4) auto 0;
 }
 .legend {
   text-align: center;
@@ -1168,56 +1361,513 @@ a.tl-card:hover {
   border-style: dashed;
 }
 
-/* ------------------------------------------------------------ search (§9) ---
-   Custom overlay over Pagefind's JS API. Foil-accented (no single era owns
-   the whole archive), paper-raised panel, honest dev-mode empty state. */
-.search-open {
+/* --------------------------------------------------------- constellation ---
+   The infinite-canvas chart of polymer history: time runs left→right,
+   families form strands, eras stand as book-spine bands. Semantic zoom is
+   driven by .zoom-far/.zoom-mid/.zoom-near on the viewport. The plate sits
+   on --paper-deep like a fold-out chronology in a fine edition. */
+.const-head {
+  text-align: center;
+  padding: var(--space-4) var(--page-pad) var(--space-3);
+}
+.const-title {
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 600;
+  margin: 0;
+}
+.const-sub {
+  color: var(--ink-muted);
+  font-style: italic;
+  margin: 0.4rem 0 0;
+}
+.const-wrap {
+  max-width: 74rem;
+  margin: 0 auto;
+  padding: 0 var(--page-pad) var(--space-4);
+}
+.const-status {
+  text-align: center;
+  color: var(--ink-muted);
+  padding: var(--space-5) var(--page-pad);
+}
+/* --- toolbar: filters as a designed moment ------------------------------- */
+.chart-wrap {
+  max-width: 90rem;
+  margin: 0 auto;
+  padding: 0 var(--page-pad) var(--space-4);
+}
+.chart-toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-2);
+}
+.chart-select {
+  position: relative;
+}
+.chart-select-trigger {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-  background: none;
-  border: 1px solid var(--rule);
-  border-radius: var(--radius-small);
-  color: var(--ink-soft);
+  gap: 0.55rem;
   font: inherit;
-  font-size: 0.88rem;
-  padding: 0.3rem 0.7rem;
+  font-size: 0.92rem;
+  color: var(--ink);
+  background: var(--paper-raised);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius-small);
+  padding: 0.42rem 0.85rem;
   cursor: pointer;
-  transition: border-color 0.2s var(--ease), color 0.2s var(--ease);
+  transition: border-color 0.25s var(--ease), box-shadow 0.25s var(--ease);
 }
-.search-open:hover {
+.chart-select-trigger:hover,
+.chart-select.is-open .chart-select-trigger {
   border-color: var(--foil);
-  color: var(--foil);
+  box-shadow: 0 2px 10px var(--shadow);
 }
-.search-open span[aria-hidden] {
-  font-size: 1.1em;
-  line-height: 1;
+.chart-select-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  animation: chart-label-in 0.3s var(--ease);
 }
-.search-dialog {
-  border: none;
-  background: none;
-  padding: var(--space-4) var(--page-pad);
-  width: 100%;
-  max-width: 100%;
-  height: 100%;
-  max-height: 100%;
+@keyframes chart-label-in {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
-.search-dialog::backdrop {
-  background: color-mix(in srgb, var(--paper-deep) 55%, transparent);
-  backdrop-filter: blur(3px);
+.chart-select-caret {
+  color: var(--ink-muted);
+  font-size: 0.8em;
+  transition: transform 0.3s var(--ease);
 }
-.search-panel {
-  max-width: 44rem;
-  margin: 0 auto;
+.chart-select.is-open .chart-select-caret {
+  transform: rotate(180deg);
+}
+.chart-swatch {
+  width: 0.68em;
+  height: 0.68em;
+  border-radius: 50%;
+  background: var(--era-color);
+  flex: none;
+}
+.chart-menu {
+  position: absolute;
+  top: calc(100% + 0.45rem);
+  left: 0;
+  z-index: 40;
+  min-width: 19rem;
+  max-height: 24rem;
+  overflow-y: auto;
   background: var(--paper-raised);
   border: 1px solid var(--rule-strong);
   border-radius: var(--radius);
-  box-shadow: 0 18px 60px var(--shadow);
-  padding: var(--space-3);
+  box-shadow: 0 16px 44px var(--shadow);
+  padding: 0.45rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  opacity: 0;
+  transform: translateY(-8px) scale(0.97);
+  transform-origin: top left;
+  pointer-events: none;
+  transition: opacity 0.28s var(--ease), transform 0.28s var(--ease);
+}
+.chart-select.is-open .chart-menu {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+.chart-menu-item {
+  display: flex;
+  align-items: baseline;
+  gap: 0.55rem;
+  width: 100%;
+  font: inherit;
+  font-size: 0.9rem;
+  text-align: left;
+  color: var(--ink);
+  background: none;
+  border: none;
+  border-radius: var(--radius-small);
+  padding: 0.45rem 0.6rem;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(-7px);
+  transition: opacity 0.32s var(--ease), transform 0.32s var(--ease),
+    background 0.15s var(--ease);
+}
+.chart-select.is-open .chart-menu-item {
+  opacity: 1;
+  transform: none;
+}
+.chart-menu-item:hover {
+  background: var(--wash);
+}
+.chart-menu-item.is-selected .chart-menu-label {
+  color: var(--foil);
+}
+.chart-menu-label {
+  font-weight: 600;
+}
+.chart-menu-detail {
+  margin-left: auto;
+  color: var(--ink-muted);
+  font-size: 0.76rem;
+  font-variant-numeric: lining-nums tabular-nums;
+  white-space: nowrap;
+}
+.chart-reset {
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--ink-muted);
+  background: none;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-small);
+  padding: 0.4rem 0.7rem;
+  cursor: pointer;
+  transition: border-color 0.2s var(--ease), color 0.2s var(--ease);
+}
+.chart-reset:hover {
+  border-color: var(--foil);
+  color: var(--foil);
+}
+.chart-hint {
+  margin-left: auto;
+  font-size: 0.8rem;
+  color: var(--ink-muted);
+}
+.chart-zoom {
+  display: inline-flex;
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius-small);
+  overflow: hidden;
+}
+.chart-zoom button {
+  font: inherit;
+  font-size: 1rem;
+  line-height: 1;
+  color: var(--ink-soft);
+  background: none;
+  border: none;
+  padding: 0.42rem 0.7rem;
+  cursor: pointer;
+  transition: background 0.15s var(--ease), color 0.15s var(--ease);
+}
+.chart-zoom button + button {
+  border-left: 1px solid var(--rule-strong);
+}
+.chart-zoom button:hover {
+  background: var(--wash);
+  color: var(--foil);
+}
+
+/* --- the plate ------------------------------------------------------------ */
+.chart-viewport {
+  position: relative;
+  height: min(74vh, 52rem);
+  background: var(--paper-deep);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius);
+  overflow: hidden;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.chart-viewport:active {
+  cursor: grabbing;
+}
+.chart-world {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
+/* era bands: book-spine titles, faint washes */
+.chart-era {
+  position: absolute;
+  top: 0;
+  background: color-mix(in srgb, var(--era-color) 5%, transparent);
+  border-left: 2px solid color-mix(in srgb, var(--era-color) 28%, transparent);
+}
+.chart-era-title {
+  position: absolute;
+  top: 70px;
+  left: 26px;
+  writing-mode: vertical-rl;
+  font-family: var(--font-label);
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.1em;
+  font-size: 92px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  color: color-mix(in srgb, var(--era-color) 55%, transparent);
+  transition: opacity 0.4s var(--ease);
+}
+.chart-era-years {
+  position: absolute;
+  top: 78px;
+  left: 128px;
+  writing-mode: vertical-rl;
+  font-size: 34px;
+  font-variant-numeric: lining-nums tabular-nums;
+  color: color-mix(in srgb, var(--era-color) 40%, transparent);
+  transition: opacity 0.4s var(--ease);
+}
+.zoom-near .chart-era-title,
+.zoom-near .chart-era-years {
+  opacity: 0.3;
+}
+
+/* family strands */
+.chart-strands {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
+.chart-strand {
+  fill: none;
+  stroke: var(--era-color);
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+  opacity: 0.3;
+}
+
+/* nodes: real links, semantic-zoom labels */
+.chart-node {
+  position: absolute;
+  width: 0;
+  height: 0;
+  text-decoration: none;
+  transition: opacity 0.4s var(--ease), filter 0.4s var(--ease);
+}
+.chart-node.is-dim {
+  opacity: 0.1;
+  filter: grayscale(0.7);
+  pointer-events: none;
+}
+.chart-dot {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--era-color);
+  box-shadow: 0 0 0 6px color-mix(in srgb, var(--era-color) 16%, transparent);
+  transition: transform 0.2s var(--ease);
+}
+.chart-node.is-variant .chart-dot {
+  width: 15px;
+  height: 15px;
+  background: var(--paper-deep);
+  border: 4px solid var(--era-color);
+}
+.chart-node.is-concept .chart-dot {
+  border-radius: 3px;
+  transform: translate(-50%, -50%) rotate(45deg);
+  width: 16px;
+  height: 16px;
+}
+.chart-node:hover {
+  z-index: 5;
+}
+.chart-node:hover .chart-dot {
+  transform: translate(-50%, -50%) scale(1.3);
+}
+.chart-node.is-concept:hover .chart-dot {
+  transform: translate(-50%, -50%) rotate(45deg) scale(1.3);
+}
+.chart-text {
+  position: absolute;
+  left: 21px;
+  top: -13px;
+  height: 26px;
+  display: block;
+}
+.chart-abbr,
+.chart-title {
+  position: absolute;
+  left: 0;
+  top: 0;
+  white-space: nowrap;
+  line-height: 26px;
+  opacity: 0;
+  transition: opacity 0.35s var(--ease);
+}
+.chart-abbr {
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: 21px;
+  color: var(--era-color);
+}
+.chart-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.chart-year {
+  color: var(--ink-muted);
+  font-size: 14px;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+.zoom-mid .chart-abbr {
+  opacity: 1;
+}
+.zoom-near .chart-title {
+  opacity: 1;
+}
+.zoom-mid .chart-node:hover .chart-abbr {
+  opacity: 0;
+}
+.chart-node:hover .chart-title {
+  opacity: 1;
+  background: color-mix(in srgb, var(--paper-deep) 82%, transparent);
+  border-radius: 4px;
+  padding: 0 6px;
+  margin: 0 -6px;
+}
+
+/* map furniture: year ruler (top) + family labels (left), screen-fixed */
+.chart-ruler {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 30px;
+  pointer-events: none;
+  overflow: hidden;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--paper-deep) 88%, transparent) 40%,
+    transparent
+  );
+}
+.chart-tick {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+.chart-tick::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1px;
+  height: 14px;
+  background: var(--rule-strong);
+}
+.chart-tick.is-minor::before {
+  height: 8px;
+  background: var(--rule);
+}
+.chart-tick.is-edge::before {
+  width: 2px;
+  height: 19px;
+  background: var(--foil);
+}
+.tick-label {
+  position: absolute;
+  left: 6px;
+  top: 2px;
+  font-size: 0.72rem;
+  color: var(--ink-muted);
+  font-variant-numeric: lining-nums tabular-nums;
+  white-space: nowrap;
+  transition: opacity 0.3s var(--ease);
+}
+.chart-tick.is-minor .tick-label {
+  font-size: 0.66rem;
+  color: color-mix(in srgb, var(--ink-muted) 70%, transparent);
+}
+.chart-tick.is-edge .tick-label {
+  color: var(--foil);
+  font-weight: 700;
+}
+.chart-tick.is-crowded .tick-label {
+  opacity: 0;
+}
+.chart-lanelabels {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 0;
+  pointer-events: none;
+  overflow: visible;
+}
+.chart-lanelabel {
+  position: absolute;
+  left: 10px;
+  top: -0.6em;
+  font-family: var(--font-label);
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.13em;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  max-width: 11rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: color-mix(in srgb, var(--era-color) 72%, var(--ink));
+  background: color-mix(in srgb, var(--paper-deep) 80%, transparent);
+  padding: 0.1em 0.55em;
+  border-radius: var(--radius-small);
+  transition: opacity 0.35s var(--ease);
+}
+.chart-lanelabel.is-hidden {
+  opacity: 0;
+}
+@media (max-width: 720px) {
+  .chart-hint {
+    display: none;
+  }
+}
+
+/* ----------------------------------------------------------------- search ---
+   Custom UI over Pagefind's JS API. A header dropdown sharing the
+   EditionMenu's panel anatomy (2026-07-22, replaced the modal <dialog>):
+   same paper, hairlines, unfold + stagger — one coherent header language.
+   Foil-accented (no single era owns the whole archive); honest dev-mode
+   empty state. */
+.search-panel {
+  width: min(30rem, calc(100vw - 2 * var(--space-2)));
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  max-height: 80vh;
+}
+.head-search.is-open .menu-stagger:nth-child(1) {
+  transition-delay: 0.03s;
+}
+.head-search.is-open .menu-stagger:nth-child(2) {
+  transition-delay: 0.07s;
+}
+.head-search.is-open .menu-stagger:nth-child(3) {
+  transition-delay: 0.11s;
+}
+.search-panel .menu-group-label {
+  margin-bottom: 0;
+}
+@media (max-width: 640px) {
+  /* Anchor the panel to the sticky header itself so it spans the viewport
+     under both header rows, whatever their height. */
+  .head-search {
+    position: static;
+  }
+  .head-search .head-menu-panel {
+    left: var(--page-pad);
+    right: var(--page-pad);
+    top: calc(100% + 0.4rem);
+    width: auto;
+  }
 }
 .search-bar {
   display: flex;
@@ -1226,32 +1876,18 @@ a.tl-card:hover {
 }
 .search-bar input {
   flex: 1;
+  min-width: 0;
   font: inherit;
-  font-size: 1.1rem;
+  font-size: 1rem;
   color: var(--ink);
   background: var(--paper);
   border: 1px solid var(--rule);
   border-radius: var(--radius-small);
-  padding: 0.55rem 0.9rem;
+  padding: 0.5rem 0.85rem;
 }
 .search-bar input:focus {
   outline: none;
   border-color: var(--foil);
-}
-.search-close {
-  font-family: var(--font-label);
-  font-size: 0.72rem;
-  letter-spacing: 0.08em;
-  color: var(--ink-muted);
-  background: none;
-  border: 1px solid var(--rule);
-  border-radius: var(--radius-small);
-  padding: 0.35rem 0.55rem;
-  cursor: pointer;
-}
-.search-close:hover {
-  border-color: var(--foil);
-  color: var(--foil);
 }
 .search-filters {
   display: flex;
@@ -1277,6 +1913,7 @@ a.tl-card:hover {
   list-style: none;
   margin: 0;
   padding: 0;
+  max-height: min(55vh, 26rem);
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -1330,17 +1967,13 @@ a.tl-card:hover {
   color: var(--ink-muted);
   padding: var(--space-2);
 }
-@media (max-width: 720px) {
-  .search-open-label {
-    display: none;
-  }
-}
 
 /* ------------------------------------------------------- related entries ---
-   §9.3 computed "Related polymers" strip — between data blocks and the
+   Computed "Related polymers" strip — between data blocks and the
    chronological prev/next. Each card carries its own era's color. */
 .related {
-  margin-top: var(--space-4);
+  max-width: var(--measure);
+  margin: var(--space-4) auto 0;
 }
 .related-head {
   font-family: var(--font-label);
@@ -1394,7 +2027,7 @@ a.tl-card:hover {
 }
 
 /* ------------------------------------------------------ narrative figure ---
-   Structured image object (§3.3 Media) rendered inside a narrative. */
+   Structured image object rendered inside a narrative. */
 .fig {
   margin: var(--space-4) 0;
   text-align: center;

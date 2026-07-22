@@ -1,7 +1,7 @@
-// Automatic cross-linking (instructions.md §9.3): a build-time rehype plugin
-// that links polymer/concept mentions in narrative prose using the
+// Automatic cross-linking: a build-time rehype plugin that links
+// polymer/concept mentions in narrative prose using the
 // name + abbreviation[] + aliases[] dictionary from the data files.
-// Guardrails (all locked):
+// Guardrails:
 //   • at most one link per target entry per page (its first occurrence)
 //   • never inside headings, existing links, or code
 //   • never the page's own entry

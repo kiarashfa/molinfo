@@ -1,4 +1,4 @@
-// /catalogue.json — the lightweight structured-fields index (§9.3), a static
+// /catalogue.json — the lightweight structured-fields index, a static
 // build artifact powering the advanced catalogue table and the constellation
 // view's layout computation. Not Pagefind: different query shape (structured
 // filter/sort vs full-text).

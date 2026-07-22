@@ -1,5 +1,5 @@
 ---
-// Edition renderer for all 13 locked §3.3 blocks: collapsible numbered
+// Edition renderer for all 13 polymer data blocks: collapsible numbered
 // section cards (expanded by default), numeric superscript citations, and a
 // numbered References list with scroll anchors. Every block always renders,
 // with honest placeholder / N-A states — never omitted, never faked.
@@ -70,8 +70,7 @@ const processingProps = [
 ];
 
 const bool = (v: boolean | null) => (v === null ? 'not yet determined' : v ? 'Yes' : 'No');
-const structureImagePending =
-  'Structure render pending — produced in the one-time ChemDraw batch pass (§5.2).';
+const structureImagePending = 'Structure render pending — drawn in a future update.';
 ---
 
 <div class="data-blocks">
@@ -122,7 +121,7 @@ const structureImagePending =
       <FactRow label="Also known as">
         {
           data.aliases.length ? (
-            /* §9.3: aliases render here so Pagefind indexes every name
+            /* Aliases render here so Pagefind indexes every name
                variant (PE80, PE-HD, …), boosted so alias hits rank the
                entry itself first. */
             data.aliases.map((a) => (

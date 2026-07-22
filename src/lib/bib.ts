@@ -1,7 +1,7 @@
 // Minimal BibTeX parser for references.bib — pure (no astro:content), so it
 // serves both the page-render layer (content.ts) and the build-time
 // integrity checks (src/integrations/integrity.ts). The real ACS-style
-// citation renderer (§3.3 item 13) remains future infrastructure.
+// citation renderer remains future infrastructure.
 
 export interface BibEntry {
   key: string;

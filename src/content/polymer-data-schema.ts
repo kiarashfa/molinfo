@@ -1,4 +1,4 @@
-import { z } from 'astro:content';
+import { z } from 'astro/zod';
 import erasData from '../data/taxonomy/eras.json';
 import {
   propertyValueSchema,
@@ -15,10 +15,10 @@ import {
 
 const eraNames = erasData.map((e) => e.name) as [string, ...string[]];
 
-// Full locked polymer schema, instructions.md §3.3. Lives in a separate
-// `data` collection from the narrative MDX (§3.4: two files, never merged),
-// joined by `id`. Concepts get their own (not-yet-built) data schema --
-// this one is polymer_hub / polymer_variant only.
+// Full polymer data schema, all 13 blocks. Lives in a separate data
+// collection from the narrative MDX (two files per entry, never merged),
+// joined by `id`. Concepts get their own lighter data schema -- this one
+// is polymer_hub / polymer_variant only.
 export const polymerDataSchema = z.object({
   // 1. Identity
   id: z.string(),
@@ -67,19 +67,16 @@ export const polymerDataSchema = z.object({
     tg_relation_notes: z.string().nullable(),
   }),
 
-  // 5b. Physical properties (added post-launch-brief, owner decision 2026-07-14:
-  // §3.3 as originally written had no home for density despite every narrative
-  // foregrounding it; this new block covers density plus a few properties
-  // explicitly flagged as fine to leave placeholder for now).
+  // 5b. Physical properties — density plus a few bulk properties that fit
+  // none of the other blocks (several are fine to leave placeholder).
   physical: z.object({
     density: propertyValueSchema,
     melt_flow_index: propertyValueSchema,
     refractive_index: propertyValueSchema,
     dielectric_constant: propertyValueSchema,
-    // Added 2026-07-14, owner decision: conducting polymers (polyaniline,
-    // polythiophene) have no home for their defining property otherwise.
-    // Use `conditions` for doping state, since conductivity swings by
-    // orders of magnitude between doped/undoped forms.
+    // Conducting polymers (polyaniline, polythiophene) have no other home
+    // for their defining property. Use `conditions` for doping state, since
+    // conductivity swings by orders of magnitude between doped/undoped forms.
     electrical_conductivity: propertyValueSchema,
   }),
 
@@ -97,12 +94,11 @@ export const polymerDataSchema = z.object({
   mechanical: z.object({
     tensile_modulus: propertyValueSchema,
     yield_strength: propertyValueSchema,
-    // Added 2026-07-14, owner decision: distinct from yield_strength -- many
-    // sources (esp. Wikipedia infoboxes) report unqualified "tensile
-    // strength," which for brittle/amorphous thermoplastics and elastomers
-    // (no distinct yield region before failure) means strength at break, not
-    // a true yield point. Conflating the two under yield_strength was a real
-    // mislabeling caught during Era 3-4 enrichment.
+    // Deliberately distinct from yield_strength -- many sources (esp.
+    // Wikipedia infoboxes) report unqualified "tensile strength," which for
+    // brittle/amorphous thermoplastics and elastomers (no distinct yield
+    // region before failure) means strength at break, not a true yield
+    // point. Conflating the two is a real mislabeling hazard.
     tensile_strength_at_break: propertyValueSchema,
     elongation_at_break: propertyValueSchema,
     impact_izod: propertyValueSchema,

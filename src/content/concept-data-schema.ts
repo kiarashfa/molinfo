@@ -1,15 +1,14 @@
-import { z } from 'astro:content';
+import { z } from 'astro/zod';
 import erasData from '../data/taxonomy/eras.json';
 import { imageObjectSchema } from './schema-shared';
 
 const eraNames = erasData.map((e) => e.name) as [string, ...string[]];
 
-// Concept/theory-page data schema. Unlike the polymer schema (§3.3), this is
-// NOT locked in instructions.md -- §3.1 item 3 only specifies the *kind* of
-// content a concept page needs (equations rendered via KaTeX at build time,
-// derivations, worked examples, occasional bespoke figures), not a fixed
-// field list. Kept intentionally lighter than polymerDataSchema; expect to
-// extend as more concept entries (Era 2+) reveal what's actually needed.
+// Concept/theory-page data schema. Concept pages need a different *kind* of
+// content than polymers (equations rendered via KaTeX at build time,
+// derivations, worked examples, occasional bespoke figures), not the fixed
+// 13-block field list. Kept intentionally lighter than polymerDataSchema;
+// expect to extend as more concept entries reveal what's actually needed.
 const keyEquationSchema = z.object({
   name: z.string(),
   latex: z.string(), // rendered at build time via remark-math + rehype-katex, never client-side

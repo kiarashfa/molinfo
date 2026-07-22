@@ -1,4 +1,4 @@
-# CI/CD (instructions.md §2, §10): install deps → astro build (the committed
+# CI/CD: install deps → astro build (the committed
 # content-integrity checks run inside the build and fail it on violation) →
 # pagefind indexing (npm postbuild) → deploy to GitHub Pages.
 # No backend/server is part of the deployed site.

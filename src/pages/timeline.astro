@@ -1,9 +1,9 @@
 ---
-// The timeline: the second home presentation of the archive (§8) — an
-// era-colored chronological spine. Multi-entry years render as one diamond
-// marker with several cards (§4.1); variants sit at their OWN year, never
-// nested under their hub's. Data comes from timelineData() — the same
-// derived artifact served at /timeline.json (§9.3).
+// The timeline: the catalogue's chronological sibling — an era-colored
+// chronological spine. Multi-entry years render as one diamond marker
+// with several cards; variants sit at their OWN year, never nested under
+// their hub's. Data comes from timelineData() — the same derived artifact
+// served at /timeline.json.
 import Base from '../layouts/Base.astro';
 import { eraShortName } from '../lib/content';
 import { timelineData } from '../lib/derived';
@@ -13,17 +13,23 @@ const total = timeline.reduce(
   (n, era) => n + era.years.reduce((m, y) => m + y.entries.length, 0),
   0
 );
+// True data range, never hardcoded (the last entry may sit past its era's
+// formal end — e.g. ai-designed-polymers, 2020). Rendered open-ended
+// ("2020+"): the Atlas keeps growing.
+const allYears = timeline.flatMap((era) => era.years.map((y) => y.year));
+const yearFirst = Math.min(...allYears);
+const yearLast = Math.max(...allYears);
 ---
 
 <Base
   title="Timeline"
-  description={`Every entry of the Atlas of Polymers on one line of time — ${total} polymers and concepts across seven eras, 1833 to 2015.`}
+  description={`Every entry of the Atlas of Polymers on one line of time — ${total} polymers and concepts across seven eras, ${yearFirst} to ${yearLast} and counting.`}
   current="timeline"
 >
   <main>
     <header class="tl-head">
       <h1 class="tl-title">The Timeline</h1>
-      <p class="tl-sub">{total} entries along one line of time, 1833 → 2015</p>
+      <p class="tl-sub">{total} entries along one line of time, {yearFirst} → {yearLast}+</p>
     </header>
     <div class="timeline">
       {
